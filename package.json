@@ -1,0 +1,30 @@
+{
+  "name": "bilky",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon --env-file=.env index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "cloudinary": "^2.2.0",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "crypto-random-string": "^5.0.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "gmail-send": "^1.8.14",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.4.3",
+    "multer": "^1.4.5-lts.1",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.3"
+  }
+}
