@@ -11,8 +11,8 @@ const crypto = require("crypto");
 const emailOptions = {
   user: process.env.FROM_EMAIL,
   pass: process.env.GMAIL_PASSWORD,
-  // to: "",
-  subject: "", // según el texto que necesite cambio subjecct y cuerpo mail
+  to: "",
+  subject: "", // según el texto que necesite cambio subject y cuerpo mail
   text: "",
 };
 
@@ -151,24 +151,28 @@ const userController = {
 
       // digo a qué dirección de email quiero enviar el "te has registrado correctamente"
 
-      const sendRegistrationEmail = emailSend({
-        ...emailOptions,
-        to: email,
-        subject: "Te has registrado correctamente",
-        text: "te has registrado correctamente en la plataforma",
-      });
+      // const sendRegistrationEmail = emailSend({
 
-      sendRegistrationEmail((error, result, full) => {
-        if (error) {
-          console.log("no se ha podido enviar el email", error);
-          return res.json({
-            success: false,
-            message: "no se ha podido enviar el email",
-          });
-        } else {
-          console.log("email enviado correctamente", result);
+      //email send es una opción dentro de la libreria gmail-send
+      emailSend(
+        {
+          ...emailOptions,
+          to: email,
+          subject: "Te has registrado correctamente",
+          text: "te has registrado correctamente en la plataforma",
+        },
+        (error, result, full) => {
+          if (error) {
+            console.log("no se ha podido enviar el email", error);
+            return res.json({
+              success: false,
+              message: "no se ha podido enviar el email",
+            });
+          } else {
+            console.log("email enviado correctamente", result);
+          }
         }
-      });
+      );
 
       return res.json({
         success: true,
@@ -381,9 +385,9 @@ const userController = {
 
       // mandar el email
 
-      const sendRecoveryPasswordEmail = emailSend(recoveryPasswordEmail);
+      // const sendRecoveryPasswordEmail = emailSend(recoveryPasswordEmail);
 
-      sendRecoveryPasswordEmail((error, result, fullResult) => {
+      emailSend((error, result, fullResult) => {
         if (error) {
           console.log(
             "no se ha podido enviar el email de recuperación de contraseña",
