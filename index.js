@@ -32,10 +32,10 @@ app.use(
 mongoose
   .connect(
     "mongodb+srv://leticiademartino:9SmzT0Qj63ZCmrOB@clusterbilky1.loakc3y.mongodb.net/BilkyUsers",
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
+    // {
+    //   useNewUrlParser: true,
+    //   useUnifiedTopology: true,
+    // }
   )
   .then(() => console.log("¡Conexión establecida con la base de datos!"))
   .catch((err) => console.log("Se ha producido un error", err));

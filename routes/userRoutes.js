@@ -9,12 +9,13 @@ const userRouter = express.Router();
 
 userRouter.get("/", auth.validateToken, userController.getUsers);
 userRouter.get("/byEmail", userController.getUserByEmail);
-userRouter.get("/profile/:userId", userController.getUsers);
-userRouter.post("/", userController.addUser);
+// userRouter.get("/profile/:userId", userController.getUsers);
+userRouter.post("/register", userController.addUser);
 //quito el middleware para ver si funciona la ruta de addUser
 // router.post("/", auth.completeUserInfo, userController.addUser);
 // userRouter.post("/register", userController.registerUser);
 userRouter.post("/login", userController.userLogin);
+userRouter.get("/profile", auth.validateToken, userController.getUserProfile);
 userRouter.post("/recuperatePassword", userController.recoverPassword);
 userRouter.put("/update", auth.isAdmin, userController.updateUser);
 userRouter.delete("/deleteUser", auth.isAdmin, userController.deleteUser);

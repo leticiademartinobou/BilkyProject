@@ -344,6 +344,42 @@ const userController = {
       });
     }
   },
+  getUserProfile: async (req, res) => {
+    try {
+      console.log("estás accediendo a los datos del user profile");
+
+      const email = req.user.email;
+
+      const userProfile = await User.findOne({ email });
+
+      if (!userProfile) {
+        console.log("usuario no encontrado");
+        return res.json({
+          success: false,
+          message: "usuario no encontrado",
+        });
+      }
+
+      const userList = await User.find().populate("documents");
+
+      console.log("estos son los datos del user profile", userProfile);
+      console.log("estos son los documentos,", userList);
+
+      return res.json({
+        success: true,
+        message: "usuario encontrado",
+        data: userProfile,
+        userList,
+      });
+    } catch (error) {
+      console.log("se ha producido un error:", error);
+    return res.json({
+      success: false,
+      message: "se ha producido un error al intentar recuperar el perfil",
+    });
+    }
+  },
+  
   recoverPassword: async (req, res) => {
     try {
       console.log("estás intentando cambiar tu contraseña");
