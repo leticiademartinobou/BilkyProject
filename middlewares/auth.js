@@ -5,7 +5,10 @@ const auth = {
   validateToken: async (req, res, next) => {
     //extract el token con un destructuring
 
-    const { token } = req.headers;
+    // const { token } = req.headers;
+    const token = req.headers.authorization?.split(" ")[1];
+
+    // Extracción del Token: Ahora se usa req.headers.authorization?.split(" ")[1] para extraer el token en el formato Bearer <token>. Esto es un estándar común.
 
     console.log("token recibido", token);
 
@@ -33,9 +36,13 @@ const auth = {
       req.user = {
         email: verifyTokenResult.email,
         role: verifyTokenResult.role,
+        name: verifyTokenResult.name,
+        lastName: verifyTokenResult.lastName
+
       };
 
       next();
+
     } catch (error) {
       console.log("este es el error", error);
       return res.json({
@@ -109,6 +116,7 @@ const auth = {
     const verifiedUserEmail = User.find({
       email: verifyTokenResult.email,
     });
+    next()
   },
   verifyUser: (req, res, next) => {
     //consulta con la BBDD si hay usuario

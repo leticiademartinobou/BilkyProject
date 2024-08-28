@@ -236,12 +236,16 @@ const userController = {
       }
 
       const userRole = userInformation.role;
+      const userName = userInformation.name;        
+      const userLastName = userInformation.lastName;
 
       console.log("este es el role de la BBDD:", userRole);
+      console.log("Este es el nombre del usuario:", userName);
+      console.log("Este es el apellido del usuario:", userLastName);
 
       // Si nada falla generamos el token
 
-      const generatedToken = await tokenService.generateToken(email, userRole);
+      const generatedToken = await tokenService.generateToken(email, userRole, userName, userLastName);
       console.log(generatedToken);
 
       res.json({
