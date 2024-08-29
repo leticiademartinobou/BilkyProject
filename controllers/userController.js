@@ -271,7 +271,7 @@ const userController = {
 
       console.log(req.query);
 
-      const { email } = req.query;
+      const { email, name, lastName, role } = req.body;
 
       if (!email) {
         return res.json({
@@ -280,13 +280,16 @@ const userController = {
         });
       }
 
-      const userToUpdateEmailFoundByEmail = await User.updateOne(
+      const userToUpdateEmailFoundByEmail = await User.findOneAndUpdate(
+
         {
           email: email,
         },
-        { email: req.body.email },
+        { name, lastName, role },
         { new: true }
       );
+      
+
 
       if (!userToUpdateEmailFoundByEmail) {
         console.log("Usuario no encontrado");
