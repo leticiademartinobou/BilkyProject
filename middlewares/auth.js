@@ -98,6 +98,7 @@ const auth = {
     // en este middleware tengo que comprobar si el token es correcto
 
     const verifyTokenResult = jwt.verify(token, process.env.SECRET_KEY);
+    
     if (!verifyTokenResult) {
       return res.json({
         success: false,

@@ -77,9 +77,12 @@ const userController = {
   getUserByEmail: async (req, res) => {
     try {
       console.log("estás intentando buscar un email en la lista de usuarios");
-      console.log(req.query);
+      // console.log(req.query);
+      console.log("Email del param", req.params)
 
-      const { email } = req.query;
+      // const { email } = req.query;
+      const { email } = req.params;
+
 
       if (!email) {
         return res.json({
@@ -88,7 +91,7 @@ const userController = {
         });
       }
 
-      const userListEmailFound = await User.find({ email: email });
+      const userListEmailFound = await User.findOne({ email: email });
 
       return res.json({
         success: true,
