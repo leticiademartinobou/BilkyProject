@@ -387,83 +387,137 @@ const userController = {
     }
   },
   
-  // recoverPassword: async (req, res) => {
-  //   try {
-  //     console.log("estás intentando cambiar tu contraseña");
+  recoverPassword: async (req, res) => {
+    try {
+      console.log("estás intentando cambiar tu contraseña");
 
-  //     const { email } = req.body;
+      const { email } = req.body;
 
-  //     // verifico si existe el email que me manda el usuario
+      // verifico si existe el email que me manda el usuario
 
-  //     if (!email) {
-  //       console.log("el email no está en la BBDD");
-  //       return res.json({
-  //         success: false,
-  //         message: "El email no existe",
-  //       });
-  //     }
+      if (!email) {
+        console.log("el email no está en la BBDD");
+        return res.json({
+          success: false,
+          message: "El email no existe",
+        });
+      }
 
-  //     // genero la contraseña sin cifrar
+        // Verificar si el usuario existe en la base de datos
+        
+        const user = await User.findOne({ email });
 
-  //     const newPassword = generateRandomPassword();
+        if(!user) {
+          return res.json({
+            success: false, 
+            message: "El usuario no existe",
+          })
+        }
 
-  //     // actualizo la contraseña del usuario en BBDD,pero la tengo que cifrar antes
+        // generar un token único para la recuperación de la contraseña (durante 1 hora)
 
-  //     const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const resetToken = crypto.randomBytes(8).toString("hex");
+        const tokenExpiration = Date.now() + 360000;
 
-  //     //actualizo contraseña cifrada en BBDD
+        // Guardar el token y su fecha de expiración en el usuario
+      
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = tokenExpiration;
+        await user.save();
 
-  //     await User.findOneAndUpdate({ email }, { password: hashedPassword });
+        // envío un correo electrónico con el token de recuperación 
 
-  //     // pero yo le mando al usuario por email la contraseña sin cifrar newPassword
+        const resetLink = `https://bilky.com/reset-password/${resetToken};` // no tengo el dominio bilky :(
 
-  //     // preparo el email
+        const emailContent =  `
+        <html>
+        <body>
+          <h1>Recuperación de contraseña </h1>
+          <p>Hola ${user.name}, </p>
+          <p>Este es el enlace para restablecer tu contraseña </p>
+          <a href ="${resetLink}">Restablecer contraseña</a>
+          <p>Aviso! el enlace es válido sólo durante 1 hora </p>
 
-  //     const recoveryPasswordEmail = {
-  //       ...emailOptions,
-  //       to: email,
-  //       subject: "esta es tu nueva contraseña",
-  //       text: Hola ${email} tu nueva contraseña es ${newPassword},
-  //     };
+        </body>
+        </html>
+        `;
 
-  //     // mandar el email
+        let sendSmtpEmail = new brevo.sendSmtpEmail();
 
-  //     // const sendRecoveryPasswordEmail = emailSend(recoveryPasswordEmail);
+        sendSmtpEmail.subject = "Recuperación de contraseña"
+        sendSmtpEmail.to = [{email: user.email, name: user.name}]
+        sendSmtpEmail.htmlContent = emailContent
+        sendSmtpEmail.sender = {name: "Bilky", email: "leticiademartino@gmail.com"}
 
-  //     emailSend((error, result, fullResult) => {
-  //       if (error) {
-  //         console.log(
-  //           "no se ha podido enviar el email de recuperación de contraseña",
-  //           error
-  //         );
-  //         return res.json({
-  //           success: false,
-  //           message:
-  //             "no se ha podido enviar el email de recuperación de contraseña",
-  //         });
-  //       } else {
-  //         console.log(
-  //           "correo de recuperación de contraseña enviado correctamente",
-  //           result
-  //         );
-  //         return res.json({
-  //           success: true,
-  //           message:
-  //             "correo de recuperación de contraseña enviado correctamente",
-  //         });
-  //       }
-  //     });
-  //   } catch (error) {
-  //     console.log(
-  //       "se ha producido un error al intentar recuperar la contraseña",
-  //       error
-  //     );
-  //     return res.json({
-  //       success: false,
-  //       message: "se ha producido un error al intentar recuperar la contraseña",
-  //     });
-  //   }
-  // },
+        const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
+        console.log("correo enviado correctamente", result)
+
+        return res.json({
+          success: true, 
+          message:"correo de recuperación enviado correctamente"
+
+        })
+    } catch (error) {
+      console.log(
+        "se ha producido un error al intentar reestrablecer la contraseña",
+        error
+      );
+      return res.json({
+        success: false,
+        message: "Error al restablecer la contraseña",
+      });
+    }
+  },
+  //función para restablecer la contraseña con el token
+  resetPassword: async (req, res) => {
+    try {
+      const { token } = req.params
+      const { newPassword } = req.body
+
+      const user = await User.findOne({
+        resetPasswordToken: token, 
+        resentPasswordExpires: { $gt: Date.now() }
+      })
+
+      // { $gt: Date.now() }:
+
+      // $gt es un operador de MongoDB que significa "mayor que" (del inglés greater than).
+      // Date.now() devuelve la fecha y hora actual en milisegundos desde el 1 de enero de 1970.
+      // Entonces, { $gt: Date.now() } está comprobando si el campo resetPasswordExpires es mayor que el valor de Date.now(), es decir, si el tiempo de expiración del token es posterior a la hora actual.
+    
+      if(!user) {
+        return res.json({
+          success: false, 
+          message: "Token no válido o expirado"
+        })
+      }
+  
+      const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+      user.password = hashedPassword;
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+
+      await user.save();
+
+      console.log("contraseña reestablecida correctamente")
+
+      return res.json({
+        success: true,
+        message: "contraseña reestablecida correctamente"
+      })
+  
+  } catch (error) {
+
+    console.log("este es el error por el que no se ha podido actualizar la contraseña", error)
+
+    return res.json({
+      success: false, 
+      message: "No se ha podido actualizar la contraseña", error
+    })
+      
+    }
+  }
 };
 
 module.exports = userController;

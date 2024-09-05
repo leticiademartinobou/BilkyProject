@@ -16,7 +16,10 @@ userRouter.post("/register", userController.addUser);
 // userRouter.post("/register", userController.registerUser);
 userRouter.post("/login", userController.userLogin);
 userRouter.get("/profile", auth.validateToken, userController.getUserProfile);
-// userRouter.post("/recuperatePassword", userController.recoverPassword);
+// Ruta para solicitar recuperación de contraseña
+userRouter.post("/recuperatePassword", userController.recoverPassword);
+// Ruta para restablecer la contraseña con el token
+userRouter.post("/resetPassword/:token", userController.resetPassword);
 userRouter.put("/update", auth.isAdmin, userController.updateUser);
 userRouter.get("/email/:email", auth.isAdmin, userController.getUserByEmail);
 userRouter.delete("/deleteUser", auth.isAdmin, userController.deleteUser);

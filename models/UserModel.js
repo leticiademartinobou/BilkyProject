@@ -16,7 +16,7 @@ const UserSchema = new mongoose.Schema({
   age: {
     type: Number,
     validate: {
-      validator: (value) => value >= 0 && value <= 70,
+      validator: (value) => value >= 16 && value <= 70,
       message: "Age must be between 16 and 70.",
     },
     default: null,
@@ -35,6 +35,7 @@ const UserSchema = new mongoose.Schema({
     require: true,
     minlenght: 16,
     maxlenght: 30,
+
   },
   role: {
     type: String,
@@ -47,6 +48,13 @@ const UserSchema = new mongoose.Schema({
       ref: "Document",
     },
   ],
+    // Nuevos campos para la recuperación de contraseña
+    resetPasswordToken: {
+      type: String,
+    },
+    resetPasswordExpires: {
+      type: Date,
+    },
   createdAt: {
     type: Date,
     default: Date.now,
