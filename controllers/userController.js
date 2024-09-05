@@ -4,20 +4,39 @@ const jwt = require("jsonwebtoken");
 const tokenService = require("../services/token");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+const brevo = require('@getbrevo/brevo');
 // const cryptoRandomString = require("crypto-random-string");
 
 // Email options
 
-const emailOptions = {
-  user: process.env.FROM_EMAIL,
-  pass: process.env.GMAIL_PASSWORD,
-  to: "",
-  subject: "", // según el texto que necesite cambio subject y cuerpo mail
-  text: "",
-};
+let apiInstance = new brevo.TransactionalEmailsApi(); // sacado de la documentación npm brevo
 
-//llamo a la libreria gmail-send y la ejecuto
-const emailSend = require("gmail-send")(emailOptions);
+apiInstance.setApiKey(
+  brevo.TransactionalEmailsApiApiKeys.apiKey,process.env.BREVO_KEY
+  
+)
+
+// Función para enviar el correo de confirmación
+async function sendConfirmationEmail(userEmail, userName) {
+try {
+  
+  let sendSmtpEmail = new brevo.SendSmtpEmail();
+
+  sendSmtpEmail.subject = "Confirmación de Registro";
+  sendSmtpEmail.to = [{ email: userEmail, name: userName }];
+  sendSmtpEmail.htmlContent = `<html><body><h1>Hola ${userName}, gracias por registrarte en nuestra plataforma</h1></body></html>`;
+  sendSmtpEmail.sender = { name: "Bilky", email: "leticiademartino@gmail.com" };
+
+  // sendSmtpEmail.sender = { name: "Bilky", email: "no-reply@bilky.com" };
+
+  
+  const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
+  console.log("Correo enviado correctamente:", result)
+} catch (error) {
+  console.log("Este es el error", error)
+}
+}
+
 
 // Función para generar una contraseña nueva de 16 caracteres
 
@@ -152,30 +171,8 @@ const userController = {
         newUser
       );
 
-      // digo a qué dirección de email quiero enviar el "te has registrado correctamente"
-
-      // const sendRegistrationEmail = emailSend({
-
-      //email send es una opción dentro de la libreria gmail-send
-      emailSend(
-        {
-          ...emailOptions,
-          to: email,
-          subject: "Te has registrado correctamente",
-          text: "te has registrado correctamente en la plataforma",
-        },
-        (error, result, full) => {
-          if (error) {
-            console.log("no se ha podido enviar el email", error);
-            return res.json({
-              success: false,
-              message: "no se ha podido enviar el email",
-            });
-          } else {
-            console.log("email enviado correctamente", result);
-          }
-        }
-      );
+      // Enviar correo de confirmación de registro
+      await sendConfirmationEmail(email, name);
 
       return res.json({
         success: true,
@@ -390,83 +387,83 @@ const userController = {
     }
   },
   
-  recoverPassword: async (req, res) => {
-    try {
-      console.log("estás intentando cambiar tu contraseña");
+  // recoverPassword: async (req, res) => {
+  //   try {
+  //     console.log("estás intentando cambiar tu contraseña");
 
-      const { email } = req.body;
+  //     const { email } = req.body;
 
-      // verifico si existe el email que me manda el usuario
+  //     // verifico si existe el email que me manda el usuario
 
-      if (!email) {
-        console.log("el email no está en la BBDD");
-        return res.json({
-          success: false,
-          message: "El email no existe",
-        });
-      }
+  //     if (!email) {
+  //       console.log("el email no está en la BBDD");
+  //       return res.json({
+  //         success: false,
+  //         message: "El email no existe",
+  //       });
+  //     }
 
-      // genero la contraseña sin cifrar
+  //     // genero la contraseña sin cifrar
 
-      const newPassword = generateRandomPassword();
+  //     const newPassword = generateRandomPassword();
 
-      // actualizo la contraseña del usuario en BBDD,pero la tengo que cifrar antes
+  //     // actualizo la contraseña del usuario en BBDD,pero la tengo que cifrar antes
 
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
+  //     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-      //actualizo contraseña cifrada en BBDD
+  //     //actualizo contraseña cifrada en BBDD
 
-      await User.findOneAndUpdate({ email }, { password: hashedPassword });
+  //     await User.findOneAndUpdate({ email }, { password: hashedPassword });
 
-      // pero yo le mando al usuario por email la contraseña sin cifrar newPassword
+  //     // pero yo le mando al usuario por email la contraseña sin cifrar newPassword
 
-      // preparo el email
+  //     // preparo el email
 
-      const recoveryPasswordEmail = {
-        ...emailOptions,
-        to: email,
-        subject: "esta es tu nueva contraseña",
-        text: `Hola ${email} tu nueva contraseña es ${newPassword}`,
-      };
+  //     const recoveryPasswordEmail = {
+  //       ...emailOptions,
+  //       to: email,
+  //       subject: "esta es tu nueva contraseña",
+  //       text: Hola ${email} tu nueva contraseña es ${newPassword},
+  //     };
 
-      // mandar el email
+  //     // mandar el email
 
-      // const sendRecoveryPasswordEmail = emailSend(recoveryPasswordEmail);
+  //     // const sendRecoveryPasswordEmail = emailSend(recoveryPasswordEmail);
 
-      emailSend((error, result, fullResult) => {
-        if (error) {
-          console.log(
-            "no se ha podido enviar el email de recuperación de contraseña",
-            error
-          );
-          return res.json({
-            success: false,
-            message:
-              "no se ha podido enviar el email de recuperación de contraseña",
-          });
-        } else {
-          console.log(
-            "correo de recuperación de contraseña enviado correctamente",
-            result
-          );
-          return res.json({
-            success: true,
-            message:
-              "correo de recuperación de contraseña enviado correctamente",
-          });
-        }
-      });
-    } catch (error) {
-      console.log(
-        "se ha producido un error al intentar recuperar la contraseña",
-        error
-      );
-      return res.json({
-        success: false,
-        message: "se ha producido un error al intentar recuperar la contraseña",
-      });
-    }
-  },
+  //     emailSend((error, result, fullResult) => {
+  //       if (error) {
+  //         console.log(
+  //           "no se ha podido enviar el email de recuperación de contraseña",
+  //           error
+  //         );
+  //         return res.json({
+  //           success: false,
+  //           message:
+  //             "no se ha podido enviar el email de recuperación de contraseña",
+  //         });
+  //       } else {
+  //         console.log(
+  //           "correo de recuperación de contraseña enviado correctamente",
+  //           result
+  //         );
+  //         return res.json({
+  //           success: true,
+  //           message:
+  //             "correo de recuperación de contraseña enviado correctamente",
+  //         });
+  //       }
+  //     });
+  //   } catch (error) {
+  //     console.log(
+  //       "se ha producido un error al intentar recuperar la contraseña",
+  //       error
+  //     );
+  //     return res.json({
+  //       success: false,
+  //       message: "se ha producido un error al intentar recuperar la contraseña",
+  //     });
+  //   }
+  // },
 };
 
 module.exports = userController;
