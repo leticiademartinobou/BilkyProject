@@ -248,7 +248,7 @@ const userController = {
       const generatedToken = await tokenService.generateToken(email, userRole, userName, userLastName);
       console.log(generatedToken);
 
-      res.json({
+      return res.json({
         success: true,
         generatedToken,
       });
@@ -299,14 +299,14 @@ const userController = {
         });
       }
 
-      res.json({
+      return res.json({
         success: true,
         message: "Has encontrado y actualizado un usuario",
         data: userToUpdateEmailFoundByEmail,
       });
     } catch (error) {
       console.log("este es el error que se ha producido", error);
-      res.json({
+      return res.json({
         success: false,
         message: "Ha ocurrido un error, intente de nuevo",
       });
@@ -387,7 +387,7 @@ const userController = {
     }
   },
   
-  recoverPassword: async (req, res) => {
+  recuperatePassword: async (req, res) => {
     try {
       console.log("estás intentando cambiar tu contraseña");
 
@@ -399,7 +399,7 @@ const userController = {
         console.log("el email no está en la BBDD");
         return res.json({
           success: false,
-          message: "El email no existe",
+          message: "El email es necesario para recuperar la contraseña",
         });
       }
 
@@ -408,9 +408,10 @@ const userController = {
         const user = await User.findOne({ email });
 
         if(!user) {
+          console.log("Usuario no encontrado");
           return res.json({
             success: false, 
-            message: "El usuario no existe",
+            message: "Usuario no encontrado",
           })
         }
 
@@ -427,7 +428,7 @@ const userController = {
 
         // envío un correo electrónico con el token de recuperación 
 
-        const resetLink = `https://bilky.com/reset-password/${resetToken};` // no tengo el dominio bilky :(
+        const resetLink = `http://localhost:3000/resetPassword/${resetToken}`;  // no tengo el dominio bilky :( (aún)
 
         const emailContent =  `
         <html>
@@ -442,7 +443,7 @@ const userController = {
         </html>
         `;
 
-        let sendSmtpEmail = new brevo.sendSmtpEmail();
+        let sendSmtpEmail = new brevo.SendSmtpEmail();
 
         sendSmtpEmail.subject = "Recuperación de contraseña"
         sendSmtpEmail.to = [{email: user.email, name: user.name}]
@@ -476,7 +477,7 @@ const userController = {
 
       const user = await User.findOne({
         resetPasswordToken: token, 
-        resentPasswordExpires: { $gt: Date.now() }
+        resetPasswordExpires: { $gt: Date.now() }
       })
 
       // { $gt: Date.now() }:

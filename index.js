@@ -21,11 +21,7 @@ app.use(cors());
 //Añado el parser de JSON para entender los json que vengan en el body
 
 app.use(express.json());
-app.use(
-  bodyParser.urlencoded({
-    extended: false,
-  })
-);
+app.use(bodyParser.urlencoded({ extended: false }));
 
 //Conexión con la BBDD
 

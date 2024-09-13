@@ -17,7 +17,7 @@ userRouter.post("/register", userController.addUser);
 userRouter.post("/login", userController.userLogin);
 userRouter.get("/profile", auth.validateToken, userController.getUserProfile);
 // Ruta para solicitar recuperación de contraseña
-userRouter.post("/recuperatePassword", userController.recoverPassword);
+userRouter.post("/recuperatePassword", userController.recuperatePassword);
 // Ruta para restablecer la contraseña con el token
 userRouter.post("/resetPassword/:token", userController.resetPassword);
 userRouter.put("/update", auth.isAdmin, userController.updateUser);
