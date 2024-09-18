@@ -7,9 +7,30 @@ const crypto = require("crypto");
 const brevo = require('@getbrevo/brevo');
 // const cryptoRandomString = require("crypto-random-string");
 
-// Email options
+let apiInstance = new brevo.TransactionalEmailsApi();
+apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_KEY);
 
-let apiInstance = new brevo.TransactionalEmailsApi(); // sacado de la documentación npm brevo
+async function testSendEmail() {
+    try {
+        let sendSmtpEmail = new brevo.SendSmtpEmail();
+        sendSmtpEmail.subject = "Prueba de Envío";
+        sendSmtpEmail.to = [{ email: "tu-email@example.com" }];
+        sendSmtpEmail.htmlContent = "<html><body><h1>Prueba de Envío</h1></body></html>";
+        sendSmtpEmail.sender = { name: "Bilky", email: "leticiademartino@gmail.com" };
+
+        const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
+        console.log("Correo de prueba enviado:", result);
+    } catch (error) {
+        console.error("Error en el envío de prueba:", error);
+    }
+}
+
+testSendEmail();
+
+
+// configuración de la API de Brevo
+
+// let apiInstance = new brevo.TransactionalEmailsApi(); // sacado de la documentación npm brevo
 
 apiInstance.setApiKey(
   brevo.TransactionalEmailsApiApiKeys.apiKey,process.env.BREVO_KEY
@@ -36,6 +57,37 @@ try {
   console.log("Este es el error", error)
 }
 }
+
+// función para enviar el correo de recuperación 
+
+async function sendRecoveryEmail(userEmail, userName, resetLink) {
+
+  try {
+    let sendSmtpEmail = new brevo.SendSmtpEmail();
+
+    sendSmtpEmail.subject = "Recuperación de contraseña"
+    sendSmtpEmail.to = [{ email: userEmail, name: userName}];
+    sendSmtpEmail.content = `
+      <html>
+        <body>
+          <h1>Recuperación de contraseña</h1>
+          <p>Hola ${userName},</p><p>Este es el enlace para restablecer tu contraseña:</p>
+          <a href="${resetLink}">Restablecer contraseña</a>
+          <p>Aviso: el enlace es válido solo durante 1 hora.</p>
+        </body>
+      </html>`;
+      sendSmtpEmail.sender = { name: "Bilky", email: "leticiademartino@gmail.com" };
+
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    console.log("correo de recuperación correctamente enviado", result);
+
+  } catch (error) {
+    // alert("No se ha podido enviar el correo de recuperación")
+    console.log("este es el error por el que no se ha enviado el correo de recuperación", error)
+  }
+  
+}
+
 
 
 // Función para generar una contraseña nueva de 16 caracteres
@@ -388,11 +440,13 @@ const userController = {
   },
   
   recuperatePassword: async (req, res) => {
-
-    const { email } = req.body;
-
     try {
-      console.log("estás intentando cambiar la contraseña para", email);
+      console.log("estás intentando cambiar tu contraseña");
+
+      // Verificar si la clave de API está cargada correctamente
+      console.log("Brevo API Key:", process.env.BREVO_KEY);
+
+      const { email } = req.body;
 
       // verifico si existe el email que me manda el usuario
 
@@ -419,52 +473,32 @@ const userController = {
         // generar un token único para la recuperación de la contraseña (durante 1 hora)
 
         const resetToken = crypto.randomBytes(8).toString("hex");
-        const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
         const tokenExpiration = Date.now() + 360000;
 
         // Guardar el token y su fecha de expiración en el usuario
       
-        user.resetPasswordToken = hashedToken;
+        user.resetPasswordToken = resetToken;
         user.resetPasswordExpires = tokenExpiration;
         await user.save();
 
         // envío un correo electrónico con el token de recuperación 
 
-        const resetLink = `http://localhost:3000/reset-password/${resetToken}`;  // no tengo el dominio bilky :( (aún)
+        const resetLink = `http://localhost:3000/resetPassword/${resetToken}`;  // no tengo el dominio bilky :( (aún)
 
-        const emailContent =  `
-        <html>
-        <body>
-          <h1>Recuperación de contraseña </h1>
-          <p>Hola ${user.name}, </p>
-          <p>Este es el enlace para restablecer tu contraseña </p>
-          <a href ="${resetLink}">Restablecer contraseña</a>
-          <p>Aviso! el enlace es válido sólo durante 1 hora </p>
+        // enviar correo de recuperación
 
-        </body>
-        </html>
-        `;
-
-        let sendSmtpEmail = new brevo.SendSmtpEmail();
-
-        sendSmtpEmail.subject = "Recuperación de contraseña"
-        sendSmtpEmail.to = [{email: user.email, name: user.name}]
-        sendSmtpEmail.htmlContent = emailContent
-        sendSmtpEmail.sender = {name: "Bilky", email: "leticiademartino@gmail.com"}
-
-        const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
-        console.log("correo enviado correctamente", result)
+        await sendRecoveryEmail(user.email, user.name, resetLink)
 
         return res.json({
           success: true, 
-          message:"correo de recuperación enviado correctamente", 
-          token: resetToken 
+          message:"correo de recuperación enviado correctamente"
 
         })
     } catch (error) {
       console.log(
         "se ha producido un error al intentar reestrablecer la contraseña",
-        error
+        // error
+        error.response ? error.response.body : error // imprime el cuerpo del error
       );
       return res.json({
         success: false,
@@ -474,17 +508,14 @@ const userController = {
   },
   //función para restablecer la contraseña con el token
   resetPassword: async (req, res) => {
-
-    const { token } = req.params // El token que llega desde la URL
-    const { newPassword } = req.body // La nueva contraseña del usuario
-
     try {
+      const { token } = req.params
+      const { newPassword } = req.body
 
-      // Hashear el token que llega para compararlo con el almacenado en la base de datos
-      const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+      // Buscar al usuario por el token y verificar que no haya expirado
 
       const user = await User.findOne({
-        resetPasswordToken: hashedToken, 
+        resetPasswordToken: token, 
         resetPasswordExpires: { $gt: Date.now() }
       })
 
@@ -504,8 +535,8 @@ const userController = {
       const hashedPassword = await bcrypt.hash(newPassword, 10)
 
       user.password = hashedPassword;
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpires = undefined; // Limpiar el token y su expiración
+      user.resetPasswordToken = undefined; // Eliminar el token para que no pueda ser reutilizado
+      user.resetPasswordExpires = undefined;
 
       await user.save();
 
