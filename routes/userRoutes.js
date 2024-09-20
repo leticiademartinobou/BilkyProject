@@ -24,4 +24,5 @@ userRouter.put("/update", auth.isAdmin, userController.updateUser);
 userRouter.get("/email/:email", auth.isAdmin, userController.getUserByEmail);
 userRouter.delete("/deleteUser", auth.isAdmin, userController.deleteUser);
 
+
 module.exports = userRouter;

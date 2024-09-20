@@ -31,7 +31,8 @@ try {
 
   
   const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
-  console.log("Correo enviado correctamente:", result)
+  console.log("Correo enviado correctamente:")
+  // console.log(result)
 } catch (error) {
   console.log("Este es el error", error)
 }
@@ -418,9 +419,9 @@ const userController = {
 
         // generar un token único para la recuperación de la contraseña (durante 1 hora)
 
-        const resetToken = crypto.randomBytes(8).toString("hex");
-        const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-        const tokenExpiration = Date.now() + 360000;
+        const resetToken = crypto.randomBytes(8).toString("hex"); // Token original
+        const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex'); // Token hasheado
+        const tokenExpiration = Date.now() + 3600000;
 
         // Guardar el token y su fecha de expiración en el usuario
       
@@ -430,7 +431,9 @@ const userController = {
 
         // envío un correo electrónico con el token de recuperación 
 
-        const resetLink = `http://localhost:3000/reset-password/${resetToken}`;  // no tengo el dominio bilky :( (aún)
+        // no tengo el dominio bilky :( (aún)
+        const resetLink = `http://localhost:3000/reset-password/${resetToken}`;  // aquí envío el token sin hashear
+        console.log("este es el enlace de que envío al correo",resetLink)
 
         const emailContent =  `
         <html>
@@ -453,7 +456,8 @@ const userController = {
         sendSmtpEmail.sender = {name: "Bilky", email: "leticiademartino@gmail.com"}
 
         const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
-        console.log("correo enviado correctamente", result)
+        console.log("correo enviado correctamente")
+        // console.log(result)
 
         return res.json({
           success: true, 
@@ -475,7 +479,7 @@ const userController = {
   //función para restablecer la contraseña con el token
   resetPassword: async (req, res) => {
 
-    const { token } = req.params // El token que llega desde la URL
+    const { token } = req.params // El token que llega desde la URL sin hashear
     const { newPassword } = req.body // La nueva contraseña del usuario
 
     try {
@@ -501,6 +505,7 @@ const userController = {
         })
       }
   
+      // Hashear la nueva contraseña antes de guardarla
       const hashedPassword = await bcrypt.hash(newPassword, 10)
 
       user.password = hashedPassword;
@@ -509,11 +514,11 @@ const userController = {
 
       await user.save();
 
-      console.log("contraseña reestablecida correctamente")
+      console.log("contraseña actualizada correctamente")
 
       return res.json({
         success: true,
-        message: "contraseña reestablecida correctamente"
+        message: "contraseña actualizada correctamente"
       })
   
   } catch (error) {

@@ -9,6 +9,7 @@ const mongoose = require("mongoose");
 const cloudinary = require("cloudinary").v2;
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const path = require('path'); // Asegúrate de agregar esta línea
 // const cryptoRandomString = require("crypto-random-string");
 
 // Instanciar (crear) objeto de tipo express
@@ -50,6 +51,8 @@ cloudinary.config({
 
 app.use("/user", userRouter);
 app.use("/document", documentRouter);
+
+
 
 // arrancamos el servidor
 
