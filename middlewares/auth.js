@@ -3,10 +3,9 @@ const jwt = require("jsonwebtoken");
 
 const auth = {
   validateToken: async (req, res, next) => {
-    //extract el token con un destructuring
+    //extract el token del authorization header
 
-    // const { token } = req.headers;
-    const token = req.headers.authorization?.split(" ")[1];
+    const token = req.header("Authorization")?.split(" ")[1]; // Extracts token from 'Bearer <token>'
 
     // Extracción del Token: Ahora se usa req.headers.authorization?.split(" ")[1] para extraer el token en el formato Bearer <token>. Esto es un estándar común.
 
@@ -19,10 +18,10 @@ const auth = {
         message: "token no proporcionado",
       });
     }
-    // verifico si el token recibido es correcto
-
+    
     try {
-      let verifyTokenResult = await jwt.verify(token, process.env.SECRET_KEY);
+      // verifico si el token recibido es correcto
+      let verifyTokenResult = await jwt.verify(token, process.env.SECRET_KEY); // esto es para verificar el token
       console.log(
         "Email obtenido si la firma es correcta: ",
         verifyTokenResult.email,
@@ -41,13 +40,13 @@ const auth = {
 
       };
 
-      next();
+      next(); // que se vaya al siguiente middleware
 
     } catch (error) {
       console.log("este es el error", error);
       return res.json({
         success: false,
-        message: error,
+        message: "Invalid or expired token",
       });
     }
   },
