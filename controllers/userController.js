@@ -267,32 +267,29 @@ const userController = {
   },
 
   updateUser: async (req, res) => {
+
+    const { newEmail, password }  = req.body // email y password lo cojo del body
+    const userId = req.user.userId // obtengo el userId del token
+
     try {
       console.log("vas a modificar un usuario");
 
-      console.log(req.query);
+      // console.log(req.query);
 
-      const { email, name, lastName, role } = req.body;
+      // const { email, name, lastName, role } = req.body;
 
-      if (!email) {
+      if (!userId) {
         return res.json({
           success: false,
-          message: "el email es necesario para actualizar un usuario",
+          message: "No se ha encontrado el userId en el token",
         });
       }
 
-      const userToUpdateEmailFoundByEmail = await User.findOneAndUpdate(
-
-        {
-          email: email,
-        },
-        { name, lastName, role },
-        { new: true }
-      );
+      const userToUpdateEmailFoundById = await User.findById(userId);
       
 
 
-      if (!userToUpdateEmailFoundByEmail) {
+      if (!userToUpdateEmailFoundById) {
         console.log("Usuario no encontrado");
         return res.json({
           success: false,
@@ -300,10 +297,22 @@ const userController = {
         });
       }
 
+      // actualizar los detalles del usuario
+
+      if(newEmail) userToUpdateEmailFoundById.email = newEmail
+      if(password) userToUpdateEmailFoundById.password = password // verificar que esté hasheada en mi User modell
+      if(req.body.name) userToUpdateEmailFoundById.name = req.body.name
+      if(req.body.lastName) userToUpdateEmailFoundById.lastName = req.body.lastName
+      if(req.body.role) userToUpdateEmailFoundById.role = req.body.role
+
+      // guardo lo actualizado en la BBDD de Mongo
+
+      const updatedUser = await userToUpdateEmailFoundById.save()
+
       return res.json({
         success: true,
         message: "Has encontrado y actualizado un usuario",
-        data: userToUpdateEmailFoundByEmail,
+        data: updatedUser,
       });
     } catch (error) {
       console.log("este es el error que se ha producido", error);

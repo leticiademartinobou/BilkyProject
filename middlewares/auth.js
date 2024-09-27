@@ -33,6 +33,7 @@ const auth = {
       console.log(verifyTokenResult);
 
       req.user = {
+        userId: verifyTokenResult.userId,
         email: verifyTokenResult.email,
         role: verifyTokenResult.role,
         name: verifyTokenResult.name,
