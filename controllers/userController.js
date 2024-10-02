@@ -239,14 +239,17 @@ const userController = {
       const userRole = userInformation.role;
       const userName = userInformation.name;        
       const userLastName = userInformation.lastName;
+      const userId = userInformation._id
 
       console.log("este es el role de la BBDD:", userRole);
       console.log("Este es el nombre del usuario:", userName);
       console.log("Este es el apellido del usuario:", userLastName);
+      console.log("Este es el ID del usuario:", userId);
+
 
       // Si nada falla generamos el token
 
-      const generatedToken = await tokenService.generateToken(email, userRole, userName, userLastName);
+      const generatedToken = await tokenService.generateToken(email, userRole, userName, userLastName, userId);
       console.log(generatedToken);
 
       return res.json({
@@ -379,8 +382,8 @@ const userController = {
 
       const userList = await User.find().populate("documents");
 
-      console.log("estos son los datos del user profile", userProfile);
-      console.log("estos son los documentos,", userList);
+      // console.log("estos son los datos del user profile", userProfile);
+      // console.log("estos son los documentos,", userList);
 
       return res.json({
         success: true,

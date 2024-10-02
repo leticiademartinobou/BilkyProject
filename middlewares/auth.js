@@ -5,6 +5,9 @@ const auth = {
   validateToken: async (req, res, next) => {
     //extract el token del authorization header
 
+    // comprobaciones por errores varios
+
+
     const token = req.header("Authorization")?.split(" ")[1]; // Extracts token from 'Bearer <token>'
 
     // Extracción del Token: Ahora se usa req.headers.authorization?.split(" ")[1] para extraer el token en el formato Bearer <token>. Esto es un estándar común.
@@ -23,14 +26,13 @@ const auth = {
       // verifico si el token recibido es correcto
       let verifyTokenResult = await jwt.verify(token, process.env.SECRET_KEY); // esto es para verificar el token
       console.log(
-        "Email obtenido si la firma es correcta: ",
-        verifyTokenResult.email,
-        "y su rol es",
-        verifyTokenResult.role
+        "Email obtenido si la firma es correcta: ",verifyTokenResult.email,
+        "y su rol es:", verifyTokenResult.role, 
+        "y su userId es:", verifyTokenResult.userId
       );
       // en caso de que el token sea válido, se añade la información del usuario a req.user
       // para que esté disponible
-      console.log(verifyTokenResult);
+      console.log("este es el verifyTokenResult",verifyTokenResult);
 
       req.user = {
         userId: verifyTokenResult.userId,
@@ -54,7 +56,7 @@ const auth = {
 
   isAdmin: async (req, res, next) => {
     try {
-      const { token } = req.headers;
+      const token = req.header("Authorization")?.split(" ")[1]; // Extraer el token de la cabecera
 
       if (!token) {
         console.log("token no proporcionado");
@@ -96,6 +98,15 @@ const auth = {
   },
   verifyToken: (req, res, next) => {
     // en este middleware tengo que comprobar si el token es correcto
+
+    const token = req.header("Authorization")?.split(" ")[1]; // Extraer el token del encabezado
+
+    if (!token) {
+      return res.json({
+        success: false,
+        message: "Token no proporcionado",
+      });
+    }
 
     const verifyTokenResult = jwt.verify(token, process.env.SECRET_KEY);
     
