@@ -20,7 +20,7 @@ userRouter.get("/profile", auth.validateToken, userController.getUserProfile);
 userRouter.post("/recuperatePassword", userController.recuperatePassword);
 // Ruta para restablecer la contraseña con el token
 userRouter.post("/resetPassword/:token", userController.resetPassword);
-userRouter.put("/update", auth.isAdmin, userController.updateUser);
+userRouter.put("/update",auth.verifyToken, auth.isAdmin, userController.updateUser); // quiero que primero se valide el token y luego verificar si el usuario es admin para que haga cambios
 userRouter.get("/email/:email", auth.isAdmin, userController.getUserByEmail);
 userRouter.delete("/deleteUser", auth.isAdmin, userController.deleteUser);
 
