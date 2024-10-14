@@ -272,7 +272,7 @@ const userController = {
   updateUser: async (req, res) => {
 
     const { newEmail, password }  = req.body // email y password lo cojo del body
-    const userId = req.user?.userId // obtengo el userId del token - dejado aquí
+    const userId = req.user.userId // obtengo el userId del token - dejado aquí
 
     try {
       console.log("vas a modificar un usuario", userId);
