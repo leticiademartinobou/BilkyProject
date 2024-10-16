@@ -141,7 +141,6 @@ const userController = {
       // añadir a la BBDD un usuario
 
       const passwordToSave = await bcrypt.hash(password, 10);
-      console.log("este es el cifrado de la contraseña: ", passwordToSave);
 
       // hay que comprobar si el email existe de antes o no
 
@@ -167,10 +166,10 @@ const userController = {
         role,
       });
 
-      console.log(
-        "Se ha creado el usuario con la siguiente información:",
-        newUser
-      );
+      // console.log(
+      //   "Se ha creado el usuario con la siguiente información:",
+      //   newUser
+      // );
 
       // Enviar correo de confirmación de registro
       await sendConfirmationEmail(email, name);
@@ -206,26 +205,19 @@ const userController = {
         });
       }
       const userInformation = await User.findOne({ email });
-      console.log(userInformation);
+
 
       if (!userInformation) {
-        res.json({
+        return res.json({
           success: false,
-          message: "Datos de usuario incorrectos",
+          message: "El email no está registrado en nuestra base de datos",
         });
       }
 
       // Comprobamos si la contraseña coincide con la almacenada en la BBDD
 
-      const matchPassword = await bcrypt.compare(
-        password,
-        userInformation.password
-      );
+      const matchPassword = await bcrypt.compare(password,userInformation.password);
 
-      console.log(
-        "esto es lo que sale al hacer un console.log de matchPassword: ",
-        matchPassword
-      );
 
       // validaciones de contraseña y role
 
@@ -240,12 +232,6 @@ const userController = {
       const userName = userInformation.name;        
       const userLastName = userInformation.lastName;
       const userId = userInformation._id
-
-      console.log("este es el role de la BBDD:", userRole);
-      console.log("Este es el nombre del usuario:", userName);
-      console.log("Este es el apellido del usuario:", userLastName);
-      console.log("Este es el ID del usuario:", userId);
-
 
       // Si nada falla generamos el token
 
@@ -276,10 +262,6 @@ const userController = {
 
     try {
       console.log("vas a modificar un usuario", userId);
-
-      // console.log(req.query);
-
-      // const { email, name, lastName, role } = req.body;
 
       if (!userId) {
         return res.json({
