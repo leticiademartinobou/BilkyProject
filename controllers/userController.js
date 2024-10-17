@@ -32,7 +32,7 @@ try {
   
   const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
   console.log("Correo enviado correctamente:")
-  // console.log(result)
+
 } catch (error) {
   console.log("Este es el error", error)
 }
@@ -97,10 +97,7 @@ const userController = {
   getUserByEmail: async (req, res) => {
     try {
       console.log("estás intentando buscar un email en la lista de usuarios");
-      // console.log(req.query);
-      console.log("Email del param", req.params)
 
-      // const { email } = req.query;
       const { email } = req.params;
 
 
@@ -165,11 +162,6 @@ const userController = {
         password: passwordToSave,
         role,
       });
-
-      // console.log(
-      //   "Se ha creado el usuario con la siguiente información:",
-      //   newUser
-      // );
 
       // Enviar correo de confirmación de registro
       await sendConfirmationEmail(email, name);
@@ -236,7 +228,6 @@ const userController = {
       // Si nada falla generamos el token
 
       const generatedToken = await tokenService.generateToken(email, userRole, userName, userLastName, userId);
-      console.log(generatedToken);
 
       return res.json({
         success: true,
@@ -261,7 +252,7 @@ const userController = {
     const userId = req.user.userId // obtengo el userId del token - dejado aquí
 
     try {
-      console.log("vas a modificar un usuario", userId);
+      console.log("vas a modificar un usuario");
 
       if (!userId) {
         return res.json({
@@ -310,8 +301,6 @@ const userController = {
   deleteUser: async (req, res) => {
     try {
       console.log("vas a borrar un usuario");
-
-      console.log(req.query);
 
       const { email } = req.query;
 
@@ -387,7 +376,7 @@ const userController = {
     const { email } = req.body;
 
     try {
-      console.log("estás intentando cambiar la contraseña para", email);
+      console.log("estás intentando cambiar la contraseña de un email");
 
       // verifico si existe el email que me manda el usuario
 
@@ -427,7 +416,6 @@ const userController = {
 
         // no tengo el dominio bilky :( (aún)
         const resetLink = `http://localhost:3000/reset-password/${resetToken}`;  // aquí envío el token sin hashear
-        console.log("este es el enlace de que envío al correo",resetLink)
 
         const emailContent =  `
         <html>
@@ -451,7 +439,6 @@ const userController = {
 
         const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
         console.log("correo enviado correctamente")
-        // console.log(result)
 
         return res.json({
           success: true, 

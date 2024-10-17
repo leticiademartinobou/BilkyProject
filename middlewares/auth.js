@@ -12,8 +12,6 @@ const auth = {
 
     // Extracción del Token: Ahora se usa req.headers.authorization?.split(" ")[1] para extraer el token en el formato Bearer <token>. Esto es un estándar común.
 
-    console.log("token recibido", token);
-
     if (!token) {
       console.log("token no proporcionado");
       return res.json({
@@ -24,15 +22,7 @@ const auth = {
     
     try {
       // verifico si el token recibido es correcto
-      let verifyTokenResult = await jwt.verify(token, process.env.SECRET_KEY); // esto es para verificar el token
-      console.log(
-        "Email obtenido si la firma es correcta: ",verifyTokenResult.email,
-        "y su rol es:", verifyTokenResult.role, 
-        "y su userId es:", verifyTokenResult.userId
-      );
-      // en caso de que el token sea válido, se añade la información del usuario a req.user
-      // para que esté disponible
-      console.log("este es el verifyTokenResult",verifyTokenResult);
+      let verifyTokenResult = await jwt.verify(token, process.env.SECRET_KEY); // esto es para verificar el toke
 
       req.user = {
         userId: verifyTokenResult.userId,
