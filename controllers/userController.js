@@ -415,7 +415,9 @@ const userController = {
         // envío un correo electrónico con el token de recuperación 
 
         // no tengo el dominio bilky :( (aún)
-        const resetLink = `http://localhost:3000/reset-password/${resetToken}`;  // aquí envío el token sin hashear
+        const resetLink = `http://localhost:5173/reset-password/${resetToken}`;  // aquí envío el token sin hashear
+        
+        // IMP!! tengo que poner el localhost "a mano" según me ponga en la página de React
 
         const emailContent =  `
         <html>
@@ -465,12 +467,15 @@ const userController = {
 
     try {
 
+      //extraígo y cifro el token 
+      const resetToken = req.params.token
+
       // Hashear el token que llega para compararlo con el almacenado en la base de datos
-      const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+      const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
       const user = await User.findOne({
         resetPasswordToken: hashedToken, 
-        resetPasswordExpires: { $gt: Date.now() }
+        resetPasswordExpires: { $gt: Date.now() } // aquí verifico si no ha expirado
       })
 
       // { $gt: Date.now() }:

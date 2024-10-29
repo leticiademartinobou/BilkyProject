@@ -25,4 +25,6 @@ userRouter.get("/email/:email", auth.validateToken, auth.isAdmin, userController
 userRouter.delete("/deleteUser", auth.isAdmin, userController.deleteUser);
 
 
+
+
 module.exports = userRouter;
