@@ -16,9 +16,9 @@ documentRouter.get(
   documentController.getDocuments
 );
 documentRouter.post(
-  "/upload2",
+  "/upload",
   upload.single("file"),
-  documentController.uploadDocument2
+  documentController.uploadDocument
 );
 documentRouter.put(
   "/updateName",

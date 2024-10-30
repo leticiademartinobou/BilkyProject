@@ -9,9 +9,7 @@ const documentController = {
   getDocuments: async (req, res) => {
     try {
       console.log("estás obteniendo todos los documents");
-
       const documentsList = await Document.find();
-
       console.log("documentos obtenidos correctamente");
 
       return res.json({
@@ -20,10 +18,7 @@ const documentController = {
         data: documentsList,
       });
     } catch (error) {
-      console.log(
-        "este es el error que tienes antes de obtener los docs",
-        error
-      );
+      console.log("este es el error que tienes antes de obtener los docs",error);
       return res.json({
         success: false,
         message: "No se han podido obtener los documentos",
@@ -31,13 +26,19 @@ const documentController = {
       });
     }
   },
-  uploadDocument2: async (req, res) => {
+  uploadDocument: async (req, res) => {
     try {
-      console.log(
-        "estás haciendo el upload del doc con el user dentro del model del doc"
-      );
+      console.log("estás haciendo el upload del doc con el user dentro del model del doc");
 
       const { title, userEmail } = req.body;
+
+      if(!title || !userEmail) {
+        console.log("el título y el email de usuario son obligatorios")
+        return res.json({
+          success: false, 
+          message: "el título y el email de usuario son obligatorios"
+        })
+      }
 
       // tengo que buscar al usuario por el email que me ha proporcionado
 
@@ -52,6 +53,13 @@ const documentController = {
           success: false,
           message: "usuario no encontrado",
         });
+      }
+
+      if(!req.file) {
+        return res.json({
+          success: false, 
+          message: "No se ha podido subir ningún archivo",
+        })
       }
 
       //guardar el documento en cloudinary (y luego sacar) la url
