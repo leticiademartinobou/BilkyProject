@@ -13,7 +13,7 @@ const token = {
           userId
         },
         process.env.SECRET_KEY,  // Clave secreta que se usará para firmar el token
-        { expiresIn: "5m" }      // El token expira en 5 minutos
+        { expiresIn: "55m" }      // El token expira en 5 minutos
       );
  
       return token;

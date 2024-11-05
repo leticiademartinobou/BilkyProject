@@ -30,7 +30,10 @@ const documentController = {
     try {
       console.log("estás haciendo el upload del doc con el user dentro del model del doc");
 
-      const { title, userEmail } = req.body;
+      const { title, description, userEmail } = req.body;
+
+      console.log("Title recibido", title)
+      console.log("description recibida", description)
 
       if(!title || !userEmail) {
         console.log("el título y el email de usuario son obligatorios")
@@ -43,7 +46,7 @@ const documentController = {
       // tengo que buscar al usuario por el email que me ha proporcionado
 
       const userToUpdateDocuments = await User.findOne({ email: userEmail });
-      console.log(userToUpdateDocuments);
+      // console.log(userToUpdateDocuments);
 
       //si no lo encuentra devuelvo un error
 
@@ -64,10 +67,11 @@ const documentController = {
 
       //guardar el documento en cloudinary (y luego sacar) la url
 
-      console.log("esto es req.file", req.file.path);
+      // console.log("esto es req.file", req.file.path);
 
+      console.log("Subiendo el documento a cloudinary")
       const uploadedDocument = await cloudinary.uploader.upload(req.file.path);
-      console.log("este es el uploaded doc: ", uploadedDocument);
+      // console.log("este es el uploaded doc: ", uploadedDocument);
 
       console.log("mirar la url", uploadedDocument.url);
 
@@ -75,11 +79,12 @@ const documentController = {
 
       const document = new Document({
         title,
+        description,
         url,
         user: userToUpdateDocuments._id, // ID del usuario en MongoDB
       });
 
-      console.log("mirar la url", document.url);
+      // console.log("mirar la url", document.url);
 
       const documentSaved = await document.save();
 
@@ -99,7 +104,7 @@ const documentController = {
         userToUpdateDocuments._id,
         {
           $set: {
-            documents: [...userToUpdateDocuments.documents, document._id],
+            documents: [...userToUpdateDocuments.documents, document._id], // puedo utilizar $push : { documents: documentSaved._id} para añadir un doc al array existente
           },
         },
         { new: true } // Devuelve el documento actualizado y no el original

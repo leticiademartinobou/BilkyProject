@@ -5,7 +5,9 @@ const multer = require("multer");
 
 // Declaro un router
 const documentRouter = express.Router();
-const upload = multer({ dest: "uploads" });
+// const upload = multer({ dest: "uploads" });
+const upload = multer({ dest: "uploads/" });
+
 
 // defino las rutas
 
