@@ -29,7 +29,7 @@ documentRouter.put(
   documentController.updateDocumentName
 );
 documentRouter.delete(
-  "/deleteDocument",
+  "/delete",
   auth.validateToken,
   auth.isAdmin,
   documentController.deleteDocument
