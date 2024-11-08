@@ -8,7 +8,7 @@ const userRouter = express.Router();
 // defino las rutas
 
 userRouter.get("/", auth.validateToken, userController.getUsers);
-// userRouter.get("/byEmail", userController.getUserByEmail);
+userRouter.post("/findUserByEmail", userController.getUserByEmail);
 // userRouter.get("/profile/:userId", userController.getUsers);
 userRouter.post("/register", userController.addUser);
 //quito el middleware para ver si funciona la ruta de addUser
@@ -22,7 +22,7 @@ userRouter.post("/recuperatePassword", userController.recuperatePassword);
 userRouter.post("/resetPassword/:token", userController.resetPassword);
 userRouter.put("/update",auth.validateToken, auth.isAdmin, userController.updateUser); // quiero que primero se valide el token y luego verificar si el usuario es admin para que haga cambios
 userRouter.get("/email/:email", auth.validateToken, auth.isAdmin, userController.getUserByEmail);
-userRouter.delete("/deleteUser", auth.isAdmin, userController.deleteUser);
+userRouter.delete("/delete", auth.isAdmin, userController.deleteUser);
 
 
 
