@@ -108,12 +108,20 @@ const userController = {
         });
       }
 
-      const userListEmailFound = await User.findOne({ email: email });
+      const userEmailFound = await User.findOne({ email: email });
+
+      if(!userEmailFound) {
+        return res.json({
+          success:false,
+          message:"Usuario no encontrado"
+        })
+      }
 
       return res.json({
         success: true,
-        data: userListEmailFound,
+        data: userEmailFound,
       });
+
     } catch (error) {
       console.log("este es el error:", error);
       return res.json({
