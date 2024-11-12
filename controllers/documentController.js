@@ -199,9 +199,9 @@ const documentController = {
         // cojo el id que me indica el usuario admin desde el req.body con un destructuring
         // de esta manera saco el id del body
 
-        const { id } = req.body;
+        const { documentId } = req.body;
 
-        if (!id) {
+        if (!documentId) {
           console.log("tienes que incluir el id");
 
           return res.json({
@@ -211,7 +211,7 @@ const documentController = {
         }
 
         const documentToDelete = await Document.findByIdAndUpdate(
-          id,
+          documentId,
           { deletedAt: new Date() },
           { new: true }
         );
@@ -223,6 +223,14 @@ const documentController = {
             message: "documento no encontrado",
           });
         }
+
+        // tengo que marcar y borrar en el array de documentos el documento del usuario
+
+        await User.findByIdAndUpdate(documentToDelete.user, {
+          $pull: { documents: documentToDelete._id}
+        })
+
+        console.log("Documento marcado como eliminado", documentToDelete)
 
         // si encuentra el documento lo marca con deletedAt
 
