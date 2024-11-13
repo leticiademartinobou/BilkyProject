@@ -201,6 +201,8 @@ const documentController = {
 
         const { documentId } = req.body;
 
+        console.log("Contenido de req.body:", req.body);
+
         if (!documentId) {
           console.log("tienes que incluir el id");
 

@@ -310,7 +310,7 @@ const userController = {
     try {
       console.log("vas a borrar un usuario");
 
-      const { email } = req.query;
+      const { email } = req.body;
 
       if (!email) {
         return res.json({
@@ -319,9 +319,7 @@ const userController = {
         });
       }
 
-      const userToDeleteEmailFoundByEmail = await User.findOneAndDelete({
-        email: email,
-      });
+      const userToDeleteEmailFoundByEmail = await User.findOne({ email });
 
       if (!userToDeleteEmailFoundByEmail) {
         return res.json({
@@ -329,6 +327,10 @@ const userController = {
           message: "usuario no encontrado",
         });
       }
+
+      // elimino el usuario aquí
+
+      await userToDeleteEmailFoundByEmail.remove()
 
       return res.json({
         success: true,
