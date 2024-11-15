@@ -8,7 +8,7 @@ const userRouter = express.Router();
 // defino las rutas
 
 userRouter.get("/", auth.validateToken, userController.getUsers);
-userRouter.post("/findUserByEmail", userController.getUserByEmail);
+userRouter.post("/findUserByEmail", userController.findUserByEmail);
 // userRouter.get("/profile/:userId", userController.getUsers);
 userRouter.post("/register", userController.addUser);
 //quito el middleware para ver si funciona la ruta de addUser

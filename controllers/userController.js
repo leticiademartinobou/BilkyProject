@@ -94,11 +94,12 @@ const userController = {
     }
   },
 
-  getUserByEmail: async (req, res) => {
+  findUserByEmail: async (req, res) => {
     try {
       console.log("estás intentando buscar un email en la lista de usuarios");
+      console.log("Cuerpo de la solicitud en findUserByEmail", req.body)
 
-      const { email } = req.params;
+      const { email } = req.body;
 
 
       if (!email) {
@@ -309,8 +310,11 @@ const userController = {
   deleteUser: async (req, res) => {
     try {
       console.log("vas a borrar un usuario");
-
+      
+      
       const { email } = req.body;
+      
+      console.log("email que he puesto en el frontend recibido: ", req.body)
 
       if (!email) {
         return res.json({
